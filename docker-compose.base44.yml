@@ -47,6 +47,8 @@ services:
   setup:
     image: wordpress:cli-php8.2
     depends_on:
+      db:
+        condition: service_healthy
       wordpress:
         condition: service_healthy
     environment:
@@ -60,8 +62,16 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        echo "Waiting for WordPress to be ready..."
-        sleep 5
+        echo "Waiting for database connection..."
+        for i in $(seq 1 30); do
+          if php -r "new mysqli(getenv('WORDPRESS_DB_HOST'), getenv('WORDPRESS_DB_USER'), getenv('WORDPRESS_DB_PASSWORD'), getenv('WORDPRESS_DB_NAME'));" 2>/dev/null; then
+            echo "Database connected."
+            break
+          fi
+          echo "  Database not ready, retrying ($i/30)..."
+          sleep 2
+        done
+        echo "Running WordPress setup..."
         wp core install --url=http://localhost:3000 --title="سازمان عمران و مستغلات" --admin_user=admin --admin_password=admin123 --admin_email=admin@example.com --allow-root
         wp language core install fa_IR --activate --allow-root
         wp rewrite structure '/%postname%/' --allow-root
