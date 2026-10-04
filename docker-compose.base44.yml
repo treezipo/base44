@@ -83,6 +83,14 @@ services:
         echo "Running theme setup..."
         wp eval 'spaciaz_fa_seed_content();' --allow-root
         echo "Setup complete!"
+        touch /tmp/setup-complete
+        tail -f /dev/null
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/setup-complete"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 volumes:
   db_data:
