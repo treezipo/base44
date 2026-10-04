@@ -1,0 +1,79 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: on-failure
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppass123
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  wordpress:
+    image: wordpress:php8.2-apache
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppass123
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_CONFIG_EXTRA: |
+        define('FS_METHOD', 'direct');
+        define('WP_HOME', 'http://localhost:3000');
+        define('WP_SITEURL', 'http://localhost:3000');
+    volumes:
+      - wp_data:/var/www/html
+      - ./wp-content/themes/spaciaz-fa:/var/www/html/wp-content/themes/spaciaz-fa
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost/"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+
+  setup:
+    image: wordpress:cli-php8.2
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppass123
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wp_data:/var/www/html
+      - ./wp-content/themes/spaciaz-fa:/var/www/html/wp-content/themes/spaciaz-fa
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Waiting for WordPress to be ready..."
+        sleep 5
+        wp core install --url=http://localhost:3000 --title="سازمان عمران و مستغلات" --admin_user=admin --admin_password=admin123 --admin_email=admin@example.com --allow-root
+        wp language core install fa_IR --activate --allow-root
+        wp rewrite structure '/%postname%/' --allow-root
+        wp rewrite flush --allow-root
+        echo "Installing Elementor..."
+        wp plugin install elementor --activate --allow-root
+        echo "Activating theme..."
+        wp theme activate spaciaz-fa --allow-root
+        echo "Running theme setup..."
+        wp eval 'spaciaz_fa_seed_content();' --allow-root
+        echo "Setup complete!"
+
+volumes:
+  db_data:
+  wp_data:

@@ -1,0 +1,65 @@
+/* Spaciaz FA - RTL Stylesheet */
+
+/* RTL-specific overrides for Persian layout */
+body { direction: rtl; text-align: right; }
+
+.spaciaz-header-phone { flex-direction: row; }
+
+/* Service arrow points right in RTL */
+.spaciaz-service-arrow { transform: scaleX(1); }
+.spaciaz-service-card:hover .spaciaz-service-arrow { transform: translateX(6px); }
+
+/* Button icon in RTL */
+.spaciaz-btn-icon { transform: scaleX(1); }
+
+/* Commitment items slide right in RTL */
+.spaciaz-commitment-item:hover { transform: translateX(6px); }
+
+/* Post nav in RTL */
+.spaciaz-post-nav-prev { text-align: right; }
+.spaciaz-post-nav-next { text-align: left; }
+
+/* Breadcrumb */
+.spaciaz-breadcrumb { direction: rtl; }
+
+/* Filter bar */
+.spaciaz-filter-bar { direction: rtl; }
+
+/* Form inputs */
+.spaciaz-contact-form input,
+.spaciaz-contact-form select,
+.spaciaz-contact-form textarea { text-align: right; }
+
+/* Blog category position */
+.spaciaz-blog-category { right: 12px; left: auto; }
+
+/* Stats */
+.spaciaz-stat-value, .spaciaz-stat-suffix { direction: ltr; display: inline-block; }
+
+/* Section header row */
+.spaciaz-section-header-row { flex-direction: row; }
+
+/* About item border */
+.spaciaz-about-item h3::before { margin-right: 0; margin-left: 10px; }
+
+/* Slider nav */
+.spaciaz-slider-prev { transform: scaleX(1); }
+.spaciaz-slider-next { transform: scaleX(1); }
+
+/* Mobile menu slides from left in RTL */
+.spaciaz-mobile-menu {
+    right: auto;
+    left: -100%;
+    transition: left 0.4s ease;
+    box-shadow: 4px 0 30px rgba(0,0,0,0.15);
+}
+.spaciaz-mobile-menu.active { left: 0; right: auto; }
+
+/* Numbers in project cards */
+.spaciaz-project-number { direction: ltr; }
+
+/* Pagination */
+.spaciaz-pagination { direction: rtl; }
+
+/* Search form */
+.spaciaz-search-form { direction: rtl; }
